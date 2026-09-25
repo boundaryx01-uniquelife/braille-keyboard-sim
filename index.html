@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>점자 키보드 제작기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#eef3f5; --surface:#ffffff; --ink:#0f1e27; --muted:#465a67; --rule:#d0dbe1;
+  --accent:#0a6787; --accent-soft:#e2f0f6; --code-bg:#e8eef1;
+  --ok-fg:#14633c; --ok-bg:#dff3e7; --warn-fg:#87470a; --warn-bg:#fcefd6;
+  --dot-on:#0a6787; --dot-off:#c3d2da;
+  --sans:"IBM Plex Sans KR","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","D2Coding","Nanum Gothic Coding",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#091218; --surface:#0f1c24; --ink:#e3edf2; --muted:#9db2be; --rule:#22343e;
+    --accent:#b0e0ff; --accent-soft:#12303f; --code-bg:#0c1820;
+    --ok-fg:#7bdcad; --ok-bg:#0f3025; --warn-fg:#f4bd66; --warn-bg:#33270e;
+    --dot-on:#b0e0ff; --dot-off:#233a47;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#091218; --surface:#0f1c24; --ink:#e3edf2; --muted:#9db2be; --rule:#22343e;
+  --accent:#b0e0ff; --accent-soft:#12303f; --code-bg:#0c1820;
+  --ok-fg:#7bdcad; --ok-bg:#0f3025; --warn-fg:#f4bd66; --warn-bg:#33270e;
+  --dot-on:#b0e0ff; --dot-off:#233a47;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;
+  -webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:break-word}
+.page{padding-inline:16px}
+a{color:var(--accent);text-underline-offset:.18em}
+a:focus-visible,summary:focus-visible,.scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+.skip{position:absolute;left:-9999px;top:0;background:var(--surface);color:var(--ink);padding:.5rem .75rem;z-index:5}
+.skip:focus{left:16px;top:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.masthead{max-width:1120px;margin-inline:auto;padding-block:2.5rem 1.5rem;display:grid;gap:1rem}
+.cells{width:11.5rem;max-width:60%;height:auto;display:block}
+.cells .on{fill:var(--dot-on)} .cells .off{fill:var(--dot-off)}
+.masthead h1{margin:0;font-size:clamp(1.9rem,5vw,2.75rem);line-height:1.2;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.lead{margin:0;color:var(--muted);font-size:1.075rem;max-width:40rem;line-height:1.7}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;margin:.25rem 0 0;padding:0;list-style:none;font-size:.9rem;color:var(--muted)}
+.legend li{display:flex;align-items:center;gap:.4rem}
+.jump{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.jump a{display:inline-block;padding:.45rem .9rem;border:1px solid var(--accent);border-radius:999px;text-decoration:none;font-weight:500;font-size:.95rem}
+.jump a:hover{background:var(--accent-soft)}
+
+.layout{max-width:1120px;margin-inline:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:1.5rem;padding-bottom:4rem}
+.toc-wide{display:none}
+.toc-narrow{border:1px solid var(--rule);border-radius:8px;background:var(--surface);padding:.25rem 1rem}
+.toc-narrow summary{cursor:pointer;padding:.6rem 0;font-weight:600}
+.toc ol,.toc ul{list-style:none;margin:0;padding:0}
+.toc li{line-height:1.5}
+.toc a{display:block;padding:.28rem 0;color:var(--muted);text-decoration:none;font-size:.9rem}
+.toc a:hover{color:var(--accent);text-decoration:underline}
+.toc .part>a{color:var(--ink);font-weight:600;padding-top:.7rem}
+.toc .sub{padding-left:.75rem}
+@media (min-width:1000px){
+  .layout{grid-template-columns:15rem minmax(0,1fr);gap:3rem}
+  .toc-wide{display:block;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start;
+    max-height:calc(100vh - 32px);overflow:auto;padding-right:.5rem}
+  .toc-narrow{display:none}
+}
+
+main{min-width:0}
+main>section+section{margin-top:5rem;padding-top:2.5rem;border-top:1px solid var(--rule)}
+.eyebrow{margin:0;font-size:.8rem;letter-spacing:.12em;color:var(--accent);font-weight:600}
+.content{max-width:46rem}
+.content h2{font-size:clamp(1.6rem,3.6vw,2.1rem);line-height:1.3;margin:.25rem 0 1rem;font-weight:700;text-wrap:balance}
+.content h3{font-size:1.4rem;line-height:1.4;margin:3rem 0 .75rem;padding-top:1.25rem;border-top:1px solid var(--rule);font-weight:600;text-wrap:balance}
+.content h4{font-size:1.1rem;line-height:1.5;margin:2rem 0 .5rem;font-weight:600}
+.content p{margin:.9rem 0}
+.content ul,.content ol{margin:.9rem 0;padding-left:1.5rem}
+.content li{margin:.35rem 0}
+.content li>ul,.content li>ol{margin:.35rem 0}
+.content li>p{margin:.25rem 0}
+.content li>.scroll{margin:.6rem 0}
+strong{font-weight:600}
+code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);padding:.1em .38em;border-radius:4px;word-break:normal;overflow-wrap:break-word}
+.scroll{overflow-x:auto;max-width:100%;margin:1.1rem 0}
+pre{margin:0;background:var(--code-bg);padding:1rem 1.1rem;border-radius:6px;font-size:.86rem;line-height:1.65;overflow-wrap:normal;word-break:normal;white-space:pre}
+pre code{background:none;padding:0;font-size:inherit;word-break:normal}
+table{border-collapse:collapse;width:100%;font-size:.92rem;line-height:1.6;background:var(--surface)}
+th,td{text-align:left;vertical-align:top;padding:.55rem .8rem;border-bottom:1px solid var(--rule)}
+th{background:var(--accent-soft);border-bottom:2px solid var(--accent);font-weight:600;white-space:nowrap}
+td{min-width:3rem}
+blockquote{margin:1.4rem 0;padding:.4rem 1.25rem;background:var(--accent-soft);border-radius:6px}
+blockquote p{margin:.7rem 0}
+.mark{display:inline-flex;align-items:center;justify-content:center;width:1.15em;height:1.15em;border-radius:50%;
+  font-size:.8em;font-weight:700;vertical-align:.1em;margin-inline-end:.35em;line-height:1;border:1px solid currentColor}
+.mark.ok{background:var(--ok-bg);color:var(--ok-fg)} .mark.ok::before{content:"\2713"}
+.mark.warn{background:var(--warn-bg);color:var(--warn-fg)} .mark.warn::before{content:"!"}
+.ref{border-bottom:1px dotted var(--muted);cursor:help}
+footer{max-width:1120px;margin-inline:auto;padding:1.5rem 0 3rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.85rem;line-height:1.7}
+
+.cards{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem;margin:0 0 2.5rem}
+@media (min-width:720px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{display:block;padding:1.25rem 1.4rem;border:1px solid var(--rule);border-radius:12px;background:var(--surface);color:var(--ink);text-decoration:none}
+.card:hover{border-color:var(--accent);background:var(--accent-soft)}
+.card h2{margin:0 0 .35rem;font-size:1.3rem}
+.card p{margin:.3rem 0;color:var(--muted)}
+.card .go{display:inline-block;margin-top:.6rem;color:var(--accent);font-weight:600}
+.landing .content{max-width:46rem}
+.landing .content h2{font-size:1.25rem;margin:0 0 .6rem}
+</style>
+</head>
+<body>
+<div class="page landing" lang="ko"><a class="skip" href="#main">본문으로 건너뛰기</a><header class="masthead"><svg class="cells" viewBox="0 0 130 48" aria-hidden="true" focusable="false"><circle class="off" cx="10.0" cy="10.0" r="4.0"/><circle class="off" cx="10.0" cy="24.0" r="4.0"/><circle class="off" cx="10.0" cy="38.0" r="4.0"/><circle class="on" cx="24.0" cy="10.0" r="4.0"/><circle class="off" cx="24.0" cy="24.0" r="4.0"/><circle class="on" cx="24.0" cy="38.0" r="4.0"/><circle class="off" cx="42.0" cy="10.0" r="4.0"/><circle class="on" cx="42.0" cy="24.0" r="4.0"/><circle class="on" cx="42.0" cy="38.0" r="4.0"/><circle class="on" cx="56.0" cy="10.0" r="4.0"/><circle class="off" cx="56.0" cy="24.0" r="4.0"/><circle class="off" cx="56.0" cy="38.0" r="4.0"/><circle class="off" cx="74.0" cy="10.0" r="4.0"/><circle class="on" cx="74.0" cy="24.0" r="4.0"/><circle class="off" cx="74.0" cy="38.0" r="4.0"/><circle class="off" cx="88.0" cy="10.0" r="4.0"/><circle class="off" cx="88.0" cy="24.0" r="4.0"/><circle class="on" cx="88.0" cy="38.0" r="4.0"/><circle class="off" cx="106.0" cy="10.0" r="4.0"/><circle class="off" cx="106.0" cy="24.0" r="4.0"/><circle class="off" cx="106.0" cy="38.0" r="4.0"/><circle class="on" cx="120.0" cy="10.0" r="4.0"/><circle class="off" cx="120.0" cy="24.0" r="4.0"/><circle class="on" cx="120.0" cy="38.0" r="4.0"/></svg><h1>점자 키보드 제작기</h1><p class="lead">시각장애인이 점 6개 키로 점자를 직접 치는 저가 오픈소스 점자 키보드를 만들어 가는 과정입니다. 영어와 한글을 지원합니다.</p><ul class="legend"><li><span class="mark ok" aria-hidden="true"></span>PC 검증됨: 하드웨어 없이 자동 테스트로 확인</li><li><span class="mark warn" aria-hidden="true"></span>실물 미검증: 실제 부품이 있어야 확인할 수 있음</li></ul></header><div class="layout" style="grid-template-columns:minmax(0,1fr)"><main id="main"><div class="cards"><a class="card" href="simulator/"><h2>시뮬레이터</h2><p>브라우저에서 키를 눌러 봅니다. 동시 입력 판정, 영어·한글 전환, 한글 조합, 기기 화면이 펌웨어와 같은 규칙으로 동작합니다.</p><span class="go">열기 →</span></a><a class="card" href="docs/"><h2>제작 기록과 만드는 설명서</h2><p>아이디어에서 지금까지의 과정, 무엇을 어떻게 확인했고 무엇을 아직 모르는지, 그리고 T-Display로 따라 만드는 순서입니다.</p><span class="go">읽기 →</span></a></div><section class="content"><h2>먼저 알아 둘 것</h2><ul><li>지금까지 확인한 것은 모두 <strong>컴퓨터에서 자동 테스트로 확인한 것</strong>입니다. 실제 스위치·화면·블루투스로 확인한 것은 아직 없습니다.</li><li>한글 점자 표는 2024 개정 한국 점자 규정의 공식 예시와 대조했을 뿐, <strong>점자 사용자·전문가의 확인을 받지 못했습니다.</strong> 틀린 점자를 가르치지 않도록 공개 전에 확인이 필요합니다.</li><li>시뮬레이터의 시간 상수(동시 입력 창 180ms 등)는 실물로 맞춰 본 값이 아닙니다.</li><li>소스 코드는 아직 공개하지 않았습니다. 같은 구조의 선례 BrailleBridge(Apache-2.0)를 참고해 새로 작성했습니다.</li></ul></section></main></div><footer><p>기준일 2026-09-24. 글꼴은 Google Fonts에서 불러옵니다.</p></footer></div>
+</body>
+</html>
